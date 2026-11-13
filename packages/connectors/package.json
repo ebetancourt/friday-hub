@@ -1,0 +1,16 @@
+{
+  "name": "@friday-hub/connectors",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/registry.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@friday-hub/sdk": "workspace:*",
+    "zod": "^4.6.7"
+  }
+}

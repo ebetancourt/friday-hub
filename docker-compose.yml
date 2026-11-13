@@ -1,0 +1,31 @@
+# Local development only: Postgres and Redis. The apps run on the host with `pnpm dev`.
+services:
+  postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: friday          # owner role: runs migrations
+      POSTGRES_PASSWORD: friday
+      POSTGRES_DB: friday
+    ports: ["${POSTGRES_PORT:-5460}:5432"]
+    volumes:
+      - pgdata:/var/lib/postgresql
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "friday", "-d", "friday"]
+      interval: 2s
+      retries: 30
+
+  redis:
+    image: redis:8
+    # BullMQ needs noeviction: an evicted key is a lost job.
+    command: ["redis-server", "--maxmemory-policy", "noeviction", "--appendonly", "yes"]
+    ports: ["${REDIS_PORT:-6390}:6379"]
+    volumes: [redisdata:/data]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      retries: 30
+
+volumes:
+  pgdata:
+  redisdata:

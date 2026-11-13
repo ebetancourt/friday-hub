@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: friday
+          POSTGRES_PASSWORD: friday
+          POSTGRES_DB: friday
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U friday -d friday"
+          --health-interval 2s --health-retries 30
+    env:
+      MIGRATION_DATABASE_URL: postgres://friday:friday@localhost:5432/friday
+      DATABASE_URL: postgres://friday_app:friday_app@localhost:5432/friday
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Create the app role
+        run: psql "$MIGRATION_DATABASE_URL" -v ON_ERROR_STOP=1 -f docker/postgres/init.sql
+      - run: pnpm db:migrate
+      - run: pnpm typecheck
+      - name: Generated client is up to date
+        run: pnpm gen && git diff --exit-code -- packages/client
+      - run: pnpm --filter @friday-hub/ui exec playwright install --with-deps chromium
+      - run: pnpm test

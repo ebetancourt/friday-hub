@@ -1,0 +1,27 @@
+{
+  "name": "@friday-hub/server",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+
+  "scripts": {
+    "dev": "pnpm run \"/^dev:/\"",
+    "dev:api": "node --env-file-if-exists=../../.env --watch src/server.ts",
+    "dev:worker": "node --env-file-if-exists=../../.env --watch src/worker.ts",
+    "start": "node src/server.ts",
+    "start:worker": "node src/worker.ts",
+    "openapi": "node src/openapi.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@fastify/swagger": "^9.9.3",
+    "@friday-hub/connectors": "workspace:*",
+    "@friday-hub/db": "workspace:*",
+    "@friday-hub/sdk": "workspace:*",
+    "bullmq": "^6.7.5",
+    "fastify": "^5.12.8",
+    "fastify-type-provider-zod": "^7.0.0",
+    "ioredis": "^6.0.0",
+    "zod": "^4.6.7"
+  }
+}
